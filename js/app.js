@@ -16,7 +16,7 @@ class MatriculaApp {
             console.log('🚗 Iniciando Calculadora de Matrículas...');
             
             // Esperar a que los datos se carguen
-            await MatriculasData.loadData();
+            const data = await MatriculasData.loadData();
             
             // Verificar dependencias
             this.checkDependencies();
@@ -28,9 +28,13 @@ class MatriculaApp {
             // Configurar eventos globales
             this.setupGlobalEvents();
             
-            // Realizar verificaciones iniciales (con pequeño retraso para asegurar datos)
-            await this.delay(100); // Añadimos un pequeño retraso
-            this.performInitialChecks();
+            // Ejecutar verificaciones iniciales solo si hay datos
+            if (data) {
+                this.performInitialChecks();
+            } else {
+                console.warn('⚠️ No se han podido cargar datos iniciales');
+                this.uiController?.showError('No hay datos disponibles. Contacte al administrador.');
+            }
             
             this.isInitialized = true;
             console.log('✅ Aplicación inicializada correctamente');
