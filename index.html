@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🚗 Calculadora de Matrícula</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Calculadora de Matrícula</h1>
+        <div class="input-group">
+            <label for="matricula">Introduce la matrícula completa:</label>
+            <input type="text" id="matricula" placeholder="Ej: 1234ABC">
+        </div>
+        <button id="calcular-btn">Calcular Fecha</button>
+        <div id="resultado"></div>
+        <div class="info">
+            Instrucciones:<br>
+            Introduce la matrícula completa española: 4 números seguidos de 3 letras (sin espacios ni guiones)<br>
+            Ejemplo: 1234ABC
+        </div>
+
+        <!-- Carga de scripts desde la carpeta /js -->
+        <script src="js/matriculas-data.js"></script>
+        <script src="js/date-utils.js"></script>
+        <script src="js/matricula-service.js"></script>
+        <script src="js/ui-controller.js"></script>
+        <script src="js/app.js"></script>
+    </div>
+</body>
+</html>
