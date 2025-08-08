@@ -77,9 +77,11 @@ class MatriculasData {
      * Construye la ruta base para el JSON según ubicación actual
      */
     static getDataUrl() {
-        const basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
-        return `${basePath}data/matriculas.json`;
+    // Detecta la ruta base (subcarpeta incluida) y construye la URL del JSON
+    const basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+    return `${basePath}data/matriculas.json`;
     }
+
 
     /**
      * Carga los datos desde /data/matriculas.json
