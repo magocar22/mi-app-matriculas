@@ -15,8 +15,6 @@ class MatriculasData {
 
     /**
      * Valida la integridad de los datos
-     * @param {Object} data - Datos a validar
-     * @returns {boolean} True si es válido, false si hay advertencias
      */
     static validateData(data) {
         const currentYear = new Date().getFullYear();
@@ -48,19 +46,16 @@ class MatriculasData {
 
                 const letters = data[year][month];
                 if (letters !== '---') {
-                    // Validar formato de letras
                     if (!/^[A-Z]{3}$/.test(letters)) {
                         throw new Error(`Combinación de letras inválida para ${month} ${year}: ${letters}`);
                     }
-                    // Validar letras prohibidas
                     for (const letter of prohibitedLetters) {
                         if (letters.includes(letter)) {
                             throw new Error(`Letra no permitida en ${month} ${year}: ${letter}`);
                         }
                     }
-                    // Validar secuencia alfabética (advertencia en lugar de error)
                     if (lastLetters && letters <= lastLetters) {
-                        console.warn(`Advertencia: Combinación de letras no secuencial en ${month} ${year}: ${letters} debe ser mayor que ${lastLetters}`);
+                        console.warn(`Advertencia: Combinación no secuencial en ${month} ${year}: ${letters} <= ${lastLetters}`);
                         isValid = false;
                     } else {
                         lastLetters = letters;
@@ -79,31 +74,49 @@ class MatriculasData {
     }
 
     /**
+     * Construye la ruta base para el JSON según ubicación actual
+     */
+    static getDataUrl() {
+        const basePath = window.location.pathname.replace(/\/[^\/]*$/, '/');
+        return `${basePath}data/matriculas.json`;
+    }
+
+    /**
      * Carga los datos desde /data/matriculas.json
-     * @returns {Promise<Object>} Datos cargados
      */
     static async loadData() {
         if (this.isLoading) return this.DATA;
         this.isLoading = true;
 
+        const primaryUrl = this.getDataUrl();
+        const fallbackUrl = './data/matriculas.json';
+
         try {
-            const response = await fetch('/data/matriculas.json');
+            let response = await fetch(primaryUrl);
+            if (!response.ok) {
+                console.warn(`⚠️ Fallo al cargar desde ruta primaria: ${primaryUrl} (${response.status})`);
+                response = await fetch(fallbackUrl);
+            }
+
             if (!response.ok) {
                 throw new Error(`Error al cargar matriculas.json: ${response.status} ${response.statusText}`);
             }
+
             const data = await response.json();
             const isValid = this.validateData(data);
             if (isValid) {
                 this.DATA = data;
                 this.loadError = null;
+                return data;
             } else {
                 throw new Error('Datos inválidos debido a secuencias no secuenciales');
             }
-            return data;
+
         } catch (error) {
             console.error('Error al cargar datos desde matriculas.json:', error);
             this.loadError = error.message;
-            // Respaldo estático en caso de fallo
+
+            // Respaldo estático
             this.DATA = {
                 2025: {
                     'Ene': 'MYF', 'Feb': 'MYW', 'Mar': 'MZS', 'Abr': 'NBL', 'May': 'NCJ',
@@ -126,7 +139,6 @@ class MatriculasData {
 
     /**
      * Obtiene los datos, cargándolos si no están disponibles
-     * @returns {Object} Datos cargados o respaldo
      */
     static getData() {
         if (!this.DATA && !this.isLoading) {
