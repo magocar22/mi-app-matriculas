@@ -1,4 +1,23 @@
-/* Reset y configuración base */
+/* -- VARIABLES CSS Y RESET BÁSICO -- */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --error-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    --loading-gradient: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%);
+
+    --text-light: #fff;
+    --text-dark: #333;
+    --text-secondary: #555;
+    --text-muted: #666;
+
+    --border-color: #e0e0e0;
+    --border-focus: #667eea;
+    --background-info: #f8f9fa;
+    --border-radius-main: 12px;
+    --border-radius-large: 20px;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,52 +26,50 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary-gradient);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 1rem; /* Padding para evitar que el contenedor toque los bordes */
 }
 
-/* Contenedor principal */
+/* -- ESTILOS MOBILE-FIRST (POR DEFECTO) -- */
 .container {
     background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    max-width: 500px;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-large);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
     width: 100%;
+    max-width: 500px; /* max-width funciona bien en ambas vistas */
     text-align: center;
 }
 
-/* Título */
 h1 {
-    color: #333;
-    margin-bottom: 30px;
-    font-size: 28px;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem; /* Tamaño ajustado para móvil */
     font-weight: 600;
 }
 
-/* Grupo de entrada */
 .input-group {
-    margin-bottom: 30px;
+    margin-bottom: 1.5rem;
 }
 
 label {
     display: block;
-    margin-bottom: 10px;
-    color: #555;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
-/* Campo de entrada */
 input[type="text"] {
     width: 100%;
-    padding: 15px 20px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 18px;
+    padding: 0.8rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius-main);
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 2px;
     text-align: center;
@@ -61,24 +78,23 @@ input[type="text"] {
 
 input[type="text"]:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--border-focus);
 }
 
-/* Botón */
 button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--text-light);
     border: none;
-    padding: 15px 30px;
-    border-radius: 10px;
-    font-size: 16px;
+    padding: 0.9rem 1.5rem;
+    border-radius: var(--border-radius-main);
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s ease;
     width: 100%;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     transform: translateY(-2px);
 }
 
@@ -88,50 +104,50 @@ button:disabled {
     transform: none;
 }
 
-/* Área de resultados */
 .result {
-    margin-top: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    font-size: 18px;
+    margin-top: 1.5rem;
+    padding: 1.2rem;
+    border-radius: var(--border-radius-main);
+    font-size: 1rem;
     font-weight: 500;
-    min-height: 60px;
+    min-height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1.4; /* Mejora la legibilidad en mensajes largos */
 }
 
 .result.success {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
+    background: var(--success-gradient);
+    color: var(--text-light);
 }
 
 .result.error {
-    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-    color: white;
+    background: var(--error-gradient);
+    color: var(--text-light);
 }
 
 .result.warning {
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    color: #333;
+    background: var(--warning-gradient);
+    color: var(--text-dark);
 }
 
 .result.loading {
-    background: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%);
-    color: #666;
+    background: var(--loading-gradient);
+    color: var(--text-muted);
 }
 
-/* Información */
 .info {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    font-size: 14px;
-    color: #666;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--background-info);
+    border-radius: var(--border-radius-main);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
 
-/* Animaciones */
+/* Animaciones (sin cambios) */
 .fade-in {
     animation: fadeIn 0.3s ease-in;
 }
@@ -147,30 +163,32 @@ button:disabled {
     }
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* -- MEJORAS PARA PANTALLAS MÁS GRANDES (TABLET/DESKTOP) -- */
+@media (min-width: 600px) {
     .container {
-        padding: 25px;
-        margin: 10px;
+        padding: 2.5rem; /* Más espaciado en pantallas grandes */
     }
     
     h1 {
-        font-size: 24px;
-        margin-bottom: 20px;
+        font-size: 1.75rem; /* Título más grande */
+    }
+    
+    label {
+        font-size: 1rem;
     }
     
     input[type="text"] {
-        font-size: 16px;
-        padding: 12px 15px;
+        padding: 1rem 1.25rem;
+        font-size: 1.2rem;
     }
     
     button {
-        font-size: 14px;
-        padding: 12px 20px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
     }
     
     .result {
-        font-size: 16px;
-        padding: 15px;
+        font-size: 1.1rem;
+        padding: 1.25rem;
     }
 }
