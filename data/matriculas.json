@@ -8,8 +8,8 @@
     "Jun": "NDG",
     "Jul": "NFC",
     "Ago": "NFD",
-    "Sep": "---",
-    "Oct": "---",
+    "Sep": "NGJ",
+    "Oct": "NHC",
     "Nov": "---",
     "Dic": "---"
   },
@@ -335,4 +335,5 @@
     "Nov": "CCH",
     "Dic": "CDC"
   }
+
 }
