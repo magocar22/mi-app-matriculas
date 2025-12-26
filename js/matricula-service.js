@@ -234,4 +234,47 @@ class MatriculaService {
       lastUpdated: DateUtils.formatDate("Ago", 2025),
     };
   }
+
+  /**
+   * Determina la etiqueta medioambiental (DGT)
+   * @param {number} year - Año de matriculación
+   * @param {string} fuel - Tipo de combustible
+   * @returns {Object} Datos de la etiqueta (nombre e imagen)
+   */
+  static getEnvironmentalBadge(year, fuel) {
+    // URLs de Wikimedia Commons (puedes cambiarlas por rutas locales ./img/...)
+    const IMAGES = {
+      0: "https://upload.wikimedia.org/wikipedia/commons/e/ea/Etiqueta_ambiental_0_azul.svg",
+      ECO: "https://upload.wikimedia.org/wikipedia/commons/e/e3/Etiqueta_ambiental_ECO_verde_y_azul.svg",
+      C: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Etiqueta_ambiental_C_verde.svg",
+      B: "https://upload.wikimedia.org/wikipedia/commons/0/03/Etiqueta_ambiental_B_amarilla.svg",
+      A: null, // Sin etiqueta
+    };
+
+    let badge = "A"; // Por defecto sin etiqueta
+
+    // Normalizar entrada
+    const f = fuel.toLowerCase();
+
+    if (f === "electrico") {
+      badge = "0";
+    } else if (f === "hibrido") {
+      badge = "ECO";
+    } else if (f === "gasolina") {
+      if (year >= 2006) badge = "C";
+      else if (year >= 2000) badge = "B";
+    } else if (f === "diesel") {
+      if (year >= 2014) badge = "C";
+      else if (year >= 2006) badge = "B";
+    }
+
+    return {
+      type: badge,
+      image: IMAGES[badge],
+      label:
+        badge === "A"
+          ? "Sin Distintivo Ambiental"
+          : `Distintivo Ambiental ${badge}`,
+    };
+  }
 }
