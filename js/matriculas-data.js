@@ -164,4 +164,4 @@ class MatriculasData {
 }
 
 // Inicializar datos al cargar el módulo
-MatriculasData.initialize();
+// MatriculasData.initialize(); // Descomentado para evitar carga automática en algunos entornos
