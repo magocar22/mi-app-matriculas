@@ -8,7 +8,7 @@ Cálculo Rápido: Introduce una matrícula y obtén la fecha estimada de matricu
 
 Validación de Formato: La aplicación valida si la matrícula introducida cumple con el formato español (4 números y 3 letras).
 
-Letras Prohibidas: Informa si la matrícula contiene letras no utilizadas en el sistema de matriculación español (Ñ, Q, I, O, U).
+Letras Prohibidas: Informa si la matrícula contiene letras no utilizadas en el sistema de matriculación español (Ñ, Q, A, E, I, O, U).
 
 Información de Transición: Si la matrícula corresponde a un periodo de cambio entre meses, la aplicación lo indicará mostrando los 2 meses.
 

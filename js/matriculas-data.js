@@ -19,7 +19,7 @@ class MatriculasData {
     static validateData(data) {
         const currentYear = new Date().getFullYear();
         const validMonths = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        const prohibitedLetters = ['Ñ', 'Q', 'I', 'O', 'U'];
+        const prohibitedLetters = ['Ñ', 'Q', 'A', 'E', 'I', 'O', 'U'];
         let lastLetters = null;
         let isValid = true;
 
