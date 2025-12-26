@@ -244,10 +244,10 @@ class MatriculaService {
   static getEnvironmentalBadge(year, fuel) {
     // URLs de Wikimedia Commons (puedes cambiarlas por rutas locales ./img/...)
     const IMAGES = {
-        '0': 'img/badge-0.svg',
-        'ECO': 'img/badge-eco.svg',
-        'C': 'img/badge-c.svg',
-        'B': 'img/badge-b.svg',
+        '0': 'img/DistAmbDGT_CeroEmisiones.svg',
+        'ECO': 'img/DistAmbDGT_ECO.svg',
+        'C': 'img/DistAmbDGT_C.svg',
+        'B': 'img/DistAmbDGT_B.svg',
         'A': null
     };
 
