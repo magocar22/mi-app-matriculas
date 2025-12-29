@@ -62,48 +62,34 @@ class MatriculaService {
   static findMatriculaPeriod(letters) {
     let lastPeriod = null;
 
-    // 1. Obtener claves de años y ordenarlas descendentemente (más reciente primero)
-    // Esto asegura que busquemos en el periodo más reciente y no devolvamos
-    // un año anterior por coincidencia lexicográfica temprana.
+    // 1. Obtener claves de años y ordenarlas ASCENDENTEMENTE (del más antiguo al más nuevo)
+    // CORREGIDO: (a - b) en lugar de (b - a). Esto es vital para que la lógica "<=" funcione.
     const years = Object.keys(MatriculasData.DATA)
       .map((y) => parseInt(y))
-      .sort((a, b) => b - a);
+      .sort((a, b) => a - b);
 
-    // 2. Usar el orden explícito de meses (Definido en DateUtils o fallback manual)
-    // Esto evita que 'Abr' se lea antes que 'Ene' por orden alfabético
+    // 2. Usar el orden explícito de meses
     const monthsOrder =
       typeof DateUtils !== "undefined" && DateUtils.MONTHS_ORDER
         ? DateUtils.MONTHS_ORDER
         : [
-            "Ene",
-            "Feb",
-            "Mar",
-            "Abr",
-            "May",
-            "Jun",
-            "Jul",
-            "Ago",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dic",
+            "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+            "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
           ];
 
     // 3. Iteración controlada
     for (const year of years) {
       const yearData = MatriculasData.DATA[year];
 
-      // Protección por si yearData no está definido (aunque no debería pasar)
       if (!yearData) continue;
 
       for (const month of monthsOrder) {
-        // Verificar si el mes existe en los datos de ese año
         if (yearData.hasOwnProperty(month)) {
           const lastMatricula = yearData[month];
 
           if (lastMatricula !== "---") {
-            // AL estar ordenado, la primera vez que letters sea <= lastMatricula,
-            // hemos encontrado el mes exacto.
+            // Si la matrícula buscada es menor o igual al tope de este mes,
+            // entonces PERTENECE a este mes (porque venimos ordenados desde el pasado).
             if (letters <= lastMatricula) {
               return { year: year, month };
             }
@@ -127,7 +113,7 @@ class MatriculaService {
   /**
    * Calcula la fecha de matriculación basada en las letras
    * @param {string} letters - Las letras de la matrícula
-   * @param {number} numbers - Los números de la matrícula (no se usa para transición)
+   * @param {number} numbers - Los números de la matrícula
    * @returns {Object} Resultado del cálculo
    */
   static calculateDate(letters, numbers) {
@@ -162,12 +148,11 @@ class MatriculaService {
     const lastMatriculaForPeriod =
       MatriculasData.DATA[period.year][period.month];
 
-    // Verificar si es una matrícula de transición (letras coinciden con las últimas del mes)
+    // Verificar si es una matrícula de transición
     if (letters === lastMatriculaForPeriod) {
       result.success = true;
       result.isEndOfMonth = true;
       try {
-        // Obtener el mes actual y el siguiente
         const currentDateFormatted = DateUtils.formatDate(
           period.month,
           period.year
@@ -200,6 +185,7 @@ class MatriculaService {
         month: period.month,
         year: period.year,
         formatted: DateUtils.formatDate(period.month, period.year),
+        monthIndex: DateUtils.MONTHS_ORDER.indexOf(period.month) // Importante para el cálculo de Diesel
       };
     }
 
@@ -208,7 +194,6 @@ class MatriculaService {
 
   /**
    * Obtiene estadísticas de los datos
-   * @returns {Object} Estadísticas
    */
   static getDataStats() {
     let totalMonths = 0;
@@ -224,9 +209,6 @@ class MatriculaService {
       }
     }
 
-    console.log(
-      `Depuración - Total meses: ${totalMonths}, Meses disponibles: ${availableMonths}`
-    ); // Log para depuración
     return {
       minYear: Math.min(...years),
       maxYear: Math.max(...years),
@@ -238,50 +220,45 @@ class MatriculaService {
   }
 
   /**
-     * Determina la etiqueta medioambiental (DGT) con precisión mensual
-     * @param {number} year - Año de matriculación
-     * @param {number} monthIndex - Índice del mes (0=Enero, 11=Diciembre)
-     * @param {string} fuel - Tipo de combustible
-     */
+   * Determina la etiqueta medioambiental (DGT) con precisión mensual
+   */
   static getEnvironmentalBadge(year, monthIndex, fuel) {
-        // Rutas a tus imágenes PNG locales
-        const IMAGES = {
-            '0': "./img/DistAmbDGT_CeroEmisiones.png",
-            'ECO': "./img/DistAmbDGT_ECO.png",
-            'C': "./img/DistAmbDGT_C.png",
-            'B': "./img/DistAmbDGT_B.png",
-            'A': null
-        }; // <--- CORREGIDO: Cerrado con llave, no con corchete
+    const IMAGES = {
+      '0': "./img/DistAmbDGT_CeroEmisiones.png",
+      'ECO': "./img/DistAmbDGT_ECO.png",
+      'C': "./img/DistAmbDGT_C.png",
+      'B': "./img/DistAmbDGT_B.png",
+      'A': null
+    };
 
-        let badge = 'A';
-        const f = fuel.toLowerCase();
+    let badge = "A";
+    const f = fuel.toLowerCase();
 
-        if (f === 'electrico') {
-            badge = '0';
-        } else if (f === 'hibrido') {
-            badge = 'ECO';
-        } else if (f === 'gasolina') {
-            // Gasolina: Euro 3 (2000), Euro 4 (2006)
-            if (year >= 2006) badge = 'C';
-            else if (year >= 2000) badge = 'B';
-        } else if (f === 'diesel') {
-            // Diésel: Euro 4 (2006), Euro 6 (Septiembre 2015 obligatoria)
-            if (year > 2015) {
-                badge = 'C';
-            } else if (year === 2015) {
-                // Septiembre (índice 8) es el corte habitual para Euro 6 obligatorio
-                badge = (monthIndex >= 8) ? 'C' : 'B';
-            } else if (year >= 2006) {
-                badge = 'B';
-            }
-            // Anterior a 2006 es A (sin etiqueta)
-        }
-
-        return {
-            type: badge,
-            image: IMAGES[badge],
-            // CORREGIDO: Uso de comillas invertidas ` ` para que funcione la variable ${badge}
-            label: badge === 'A' ? 'Sin Distintivo Ambiental' : `Distintivo Ambiental ${badge}`
-        };
+    if (f === "electrico") {
+      badge = "0";
+    } else if (f === "hibrido") {
+      badge = "ECO";
+    } else if (f === "gasolina") {
+      if (year >= 2006) badge = "C";
+      else if (year >= 2000) badge = "B";
+    } else if (f === "diesel") {
+      if (year > 2015) {
+        badge = "C";
+      } else if (year === 2015) {
+        // Septiembre (índice 8) es el corte habitual para Euro 6 obligatorio
+        badge = monthIndex >= 8 ? "C" : "B";
+      } else if (year >= 2006) {
+        badge = "B";
+      }
     }
+
+    return {
+      type: badge,
+      image: IMAGES[badge],
+      label:
+        badge === "A"
+          ? "Sin Distintivo Ambiental"
+          : `Distintivo Ambiental ${badge}`,
+    };
+  }
 }
