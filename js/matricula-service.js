@@ -185,8 +185,8 @@ class MatriculaService {
             : "desconocido";
 
         result.adjacentDates = [
-          { formatted: currentDateFormatted },
-          { formatted: nextDateFormatted },
+          { formatted: currentDateFormatted, year: period.year },
+          { formatted: nextDateFormatted, year: nextMonthInfo.next.year },
         ];
       } catch (error) {
         result.error = "Error al calcular fechas adyacentes";
@@ -244,11 +244,11 @@ class MatriculaService {
   static getEnvironmentalBadge(year, fuel) {
     // URLs de Wikimedia Commons (puedes cambiarlas por rutas locales ./img/...)
     const IMAGES = {
-        '0': './img/DistAmbDGT_CeroEmisiones.svg',
-        'ECO': './img/DistAmbDGT_ECO.svg',
-        'C': './img/DistAmbDGT_C.svg',
-        'B': './img/DistAmbDGT_B.svg',
-        'A': null
+      0: "./img/DistAmbDGT_CeroEmisiones.svg",
+      ECO: "./img/DistAmbDGT_ECO.svg",
+      C: "./img/DistAmbDGT_C.svg",
+      B: "./img/DistAmbDGT_B.svg",
+      A: null,
     };
 
     let badge = "A"; // Por defecto sin etiqueta
