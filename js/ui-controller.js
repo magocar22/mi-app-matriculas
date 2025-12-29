@@ -69,96 +69,163 @@ class UIController {
    */
   // Sustituye o actualiza tu método handleCalculate con este:
 
-  async handleCalculate() {
-    if (this.isLoading) return;
-    this.isLoading = true;
+async handleCalculate() {
+        if (this.isLoading) return;
+        
+        // Limpiar resultados anteriores
+        this.elements.resultado.style.display = 'none';
+        this.elements.resultado.innerHTML = '';
+        
+        this.isLoading = true;
 
-    try {
-      const matricula = this.getCurrentMatricula();
-      // --- NUEVO: Obtener combustible ---
-      const combustible =
-        document.getElementById("combustible")?.value || "diesel";
+        try {
+            const matricula = this.getCurrentMatricula();
+            this.showLoading();
+            await this.delay(300);
 
-      this.showLoading();
-      await this.delay(300); // Reducido un poco para que sea más rápido
+            const validationResult = MatriculaService.validateMatricula(matricula);
+            
+            if (!validationResult.isValid) {
+                this.showError(validationResult.error);
+                return;
+            }
 
-      const validationResult = MatriculaService.validateMatricula(matricula);
+            const calculationResult = MatriculaService.calculateDate(validationResult.letters, validationResult.numbers);
+            
+            if (calculationResult.success) {
+                // 1. EXTRAER DATOS (Año y Mes)
+                let year, monthIndex, dateText;
+                
+                if (calculationResult.isEndOfMonth) {
+                    // En caso de transición, usamos el mes siguiente para ser conservadores o el actual
+                    // Usaremos el primero para la fecha, pero guardamos ambos datos
+                    year = calculationResult.adjacentDates[0].year; 
+                    // Necesitamos el índice del mes para la precisión del Diésel
+                    // DateUtils.MONTHS_ORDER nos ayuda a obtener el índice si tenemos el nombre
+                    const monthName = calculationResult.adjacentDates[0].formatted.split(' ')[0]; // "Julio"
+                    // Truco: usaremos el objeto DateUtils si expone el índice, o buscaremos en el array
+                    monthIndex = DateUtils.MONTHS_ORDER ? DateUtils.MONTHS_ORDER.indexOf(monthName.substring(0,3)) : 0; 
+                    
+                    dateText = `Transición: ${calculationResult.adjacentDates[0].formatted} o mes siguiente.`;
+                } else {
+                    year = calculationResult.date.year;
+                    monthIndex = calculationResult.date.monthIndex;
+                    dateText = `Fecha estimada: ${calculationResult.date.formatted}`;
+                }
 
-      if (!validationResult.isValid) {
-        this.showError(validationResult.error);
-        return;
-      }
+                // 2. MOSTRAR SOLO LA FECHA (Paso 1)
+                this.renderDateStep(dateText, year, monthIndex);
 
-      const calculationResult = MatriculaService.calculateDate(
-        validationResult.letters,
-        validationResult.numbers
-      );
-
-      if (calculationResult.success) {
-        // --- NUEVO: Calcular etiqueta ---
-        // Usamos el año calculado. Si es fecha futura o rango, usamos el año base.
-        const year = calculationResult.date
-          ? calculationResult.date.year
-          : calculationResult.adjacentDates[1].year;
-        const badgeInfo = MatriculaService.getEnvironmentalBadge(
-          year,
-          combustible
-        );
-
-        // Construimos el mensaje de fecha
-        let dateText = "";
-        if (calculationResult.isEndOfMonth) {
-          // Lógica existente para fin de mes...
-          const currentMonth = calculationResult.adjacentDates[0].formatted;
-          dateText = `Transición: ${currentMonth} o mes siguiente.`;
-        } else {
-          dateText = `Fecha estimada: ${calculationResult.date.formatted}`;
+            } else {
+                this.showError(calculationResult.error || 'Matrícula no encontrada.');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            this.showError('Error inesperado.');
+        } finally {
+            this.isLoading = false;
         }
-
-        // --- NUEVO: Generar HTML con imagen ---
-        let htmlContent = `
-                    <div class="result-content">
-                        <div><strong>${dateText}</strong></div>
-                `;
-
-        if (badgeInfo.image) {
-          htmlContent += `
-                        <img src="${badgeInfo.image}" alt="${badgeInfo.label}" class="badge-img fade-in">
-                        <div class="badge-label">${badgeInfo.label}</div>
-                    `;
-        } else {
-          htmlContent += `
-                        <div class="badge-label" style="margin-top:10px">❌ ${badgeInfo.label}</div>
-                        <small style="font-size:0.7em; opacity:0.8">(Por antigüedad)</small>
-                    `;
-        }
-
-        htmlContent += `</div>`;
-
-        // Usamos innerHTML en lugar de textContent
-        this.showHTMLResult(
-          htmlContent,
-          calculationResult.isEndOfMonth ? "warning" : "success"
-        );
-      } else {
-        this.showError(calculationResult.error || "Matrícula no encontrada.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      this.showError("Error inesperado.");
-    } finally {
-      this.isLoading = false;
     }
-  }
 
-  // --- AÑADIR ESTE PEQUEÑO MÉTODO HELPER EN LA CLASE UIController ---
-  showHTMLResult(html, type) {
-    const resultElement = this.elements.resultado;
-    resultElement.innerHTML = html;
-    resultElement.className = `result ${type}`;
-    resultElement.style.display = "flex";
-  }
+    /**
+     * Muestra la fecha y el botón para consultar etiqueta
+     */
+    renderDateStep(dateText, year, monthIndex) {
+        const html = `
+            <div class="result-content fade-in">
+                <div class="date-highlight">📅 ${dateText}</div>
+                
+                <div id="badge-section" class="badge-section">
+                    <button id="btn-show-badge" class="btn-secondary">
+                        🔍 Consultar Distintivo Ambiental
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        this.showHTMLResult(html, 'success');
 
+        // Añadir evento al botón recién creado
+        document.getElementById('btn-show-badge')?.addEventListener('click', (e) => {
+            e.target.style.display = 'none'; // Ocultar el botón
+            this.renderFuelSelector(year, monthIndex);
+        });
+    }
+
+    /**
+     * Muestra el selector de combustible y gestiona el cálculo de etiqueta
+     */
+    renderFuelSelector(year, monthIndex) {
+        const badgeSection = document.getElementById('badge-section');
+        if (!badgeSection) return;
+
+        badgeSection.innerHTML = `
+            <div class="fuel-selector-container fade-in">
+                <label>Selecciona el combustible:</label>
+                <div class="fuel-options">
+                    <button class="fuel-btn" data-fuel="diesel">⛽ Diésel</button>
+                    <button class="fuel-btn" data-fuel="gasolina">⛽ Gasolina</button>
+                    <button class="fuel-btn" data-fuel="hibrido">🍃 Híbrido</button>
+                    <button class="fuel-btn" data-fuel="electrico">⚡ Eléctrico</button>
+                </div>
+            </div>
+            <div id="badge-result"></div>
+        `;
+
+        // Añadir eventos a los botones de combustible
+        const buttons = badgeSection.querySelectorAll('.fuel-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Quitar clase activa a todos y ponerla al pulsado
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Calcular y mostrar
+                this.renderBadgeResult(year, monthIndex, btn.dataset.fuel);
+            });
+        });
+    }
+
+    /**
+     * Renderiza la etiqueta final
+     */
+    renderBadgeResult(year, monthIndex, fuel) {
+        const badgeInfo = MatriculaService.getEnvironmentalBadge(year, monthIndex, fuel);
+        const container = document.getElementById('badge-result');
+        
+        let html = `<div class="badge-display fade-in">`;
+        
+        if (badgeInfo.image) {
+            html += `
+                <img src="${badgeInfo.image}" alt="${badgeInfo.label}" class="badge-img">
+                <div class="badge-label">${badgeInfo.label}</div>
+            `;
+        } else {
+            html += `
+                <div class="badge-no-label">❌ Sin Distintivo</div>
+                <small>(Vehículo demasiado antiguo)</small>
+            `;
+        }
+
+        // Disclaimer obligatorio
+        html += `
+            <div class="legal-note">
+                ⚠️ <strong>Aviso Importante:</strong> Resultado estimado basado en año (${year}) y normativa estándar. 
+                <br>La clasificación real puede variar (ej. vehículos importados o rematriculados). 
+                Para seguridad 100%, consulte la <a href="https://sede.dgt.gob.es/es/vehiculos/distintivo-ambiental/" target="_blank">web oficial de la DGT</a>.
+            </div>
+        </div>`;
+
+        container.innerHTML = html;
+    }
+
+    showHTMLResult(html, type) {
+        const resultElement = this.elements.resultado;
+        resultElement.innerHTML = html;
+        resultElement.className = `result ${type}`;
+        resultElement.style.display = 'block'; // Block para que los divs ocupen ancho
+    }
+    
   /**
    * Muestra el estado de carga
    */

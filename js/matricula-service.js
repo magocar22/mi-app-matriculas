@@ -62,10 +62,12 @@ class MatriculaService {
   static findMatriculaPeriod(letters) {
     let lastPeriod = null;
 
-    // 1. Obtener claves de años y ordenarlas ascendentemente (2002, 2003...)
+    // 1. Obtener claves de años y ordenarlas descendentemente (más reciente primero)
+    // Esto asegura que busquemos en el periodo más reciente y no devolvamos
+    // un año anterior por coincidencia lexicográfica temprana.
     const years = Object.keys(MatriculasData.DATA)
       .map((y) => parseInt(y))
-      .sort((a, b) => a - b);
+      .sort((a, b) => b - a);
 
     // 2. Usar el orden explícito de meses (Definido en DateUtils o fallback manual)
     // Esto evita que 'Abr' se lea antes que 'Ene' por orden alfabético
@@ -236,45 +238,50 @@ class MatriculaService {
   }
 
   /**
-   * Determina la etiqueta medioambiental (DGT)
-   * @param {number} year - Año de matriculación
-   * @param {string} fuel - Tipo de combustible
-   * @returns {Object} Datos de la etiqueta (nombre e imagen)
-   */
-  static getEnvironmentalBadge(year, fuel) {
-    // URLs de Wikimedia Commons (puedes cambiarlas por rutas locales ./img/...)
-    const IMAGES = {
-      0: "./img/DistAmbDGT_CeroEmisiones.svg",
-      ECO: "./img/DistAmbDGT_ECO.svg",
-      C: "./img/DistAmbDGT_C.svg",
-      B: "./img/DistAmbDGT_B.svg",
-      A: null,
-    };
+     * Determina la etiqueta medioambiental (DGT) con precisión mensual
+     * @param {number} year - Año de matriculación
+     * @param {number} monthIndex - Índice del mes (0=Enero, 11=Diciembre)
+     * @param {string} fuel - Tipo de combustible
+     */
+  static getEnvironmentalBadge(year, monthIndex, fuel) {
+        // Rutas a tus imágenes PNG locales
+        const IMAGES = {
+            '0': "./img/DistAmbDGT_CeroEmisiones.png",
+            'ECO': "./img/DistAmbDGT_ECO.png",
+            'C': "./img/DistAmbDGT_C.png",
+            'B': "./img/DistAmbDGT_B.png",
+            'A': null
+        }; // <--- CORREGIDO: Cerrado con llave, no con corchete
 
-    let badge = "A"; // Por defecto sin etiqueta
+        let badge = 'A';
+        const f = fuel.toLowerCase();
 
-    // Normalizar entrada
-    const f = fuel.toLowerCase();
+        if (f === 'electrico') {
+            badge = '0';
+        } else if (f === 'hibrido') {
+            badge = 'ECO';
+        } else if (f === 'gasolina') {
+            // Gasolina: Euro 3 (2000), Euro 4 (2006)
+            if (year >= 2006) badge = 'C';
+            else if (year >= 2000) badge = 'B';
+        } else if (f === 'diesel') {
+            // Diésel: Euro 4 (2006), Euro 6 (Septiembre 2015 obligatoria)
+            if (year > 2015) {
+                badge = 'C';
+            } else if (year === 2015) {
+                // Septiembre (índice 8) es el corte habitual para Euro 6 obligatorio
+                badge = (monthIndex >= 8) ? 'C' : 'B';
+            } else if (year >= 2006) {
+                badge = 'B';
+            }
+            // Anterior a 2006 es A (sin etiqueta)
+        }
 
-    if (f === "electrico") {
-      badge = "0";
-    } else if (f === "hibrido") {
-      badge = "ECO";
-    } else if (f === "gasolina") {
-      if (year >= 2006) badge = "C";
-      else if (year >= 2000) badge = "B";
-    } else if (f === "diesel") {
-      if (year >= 2014) badge = "C";
-      else if (year >= 2006) badge = "B";
+        return {
+            type: badge,
+            image: IMAGES[badge],
+            // CORREGIDO: Uso de comillas invertidas ` ` para que funcione la variable ${badge}
+            label: badge === 'A' ? 'Sin Distintivo Ambiental' : `Distintivo Ambiental ${badge}`
+        };
     }
-
-    return {
-      type: badge,
-      image: IMAGES[badge],
-      label:
-        badge === "A"
-          ? "Sin Distintivo Ambiental"
-          : `Distintivo Ambiental ${badge}`,
-    };
-  }
 }

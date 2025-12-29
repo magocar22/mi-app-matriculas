@@ -253,3 +253,87 @@ select:focus {
     color: var(--text-secondary);
     font-weight: normal;
 }
+
+/* Estilos nuevos para la UI por pasos */
+
+.date-highlight {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.badge-section {
+    margin-top: 1rem;
+    border-top: 1px dashed rgba(0,0,0,0.1);
+    padding-top: 1rem;
+    width: 100%;
+}
+
+/* Botón secundario (Consultar etiqueta) */
+.btn-secondary {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: auto;
+    display: inline-block;
+    transition: all 0.2s;
+}
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Contenedor de botones de combustible */
+.fuel-selector-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: white; /* O negro dependiendo del fondo del resultado */
+    font-size: 0.9rem;
+}
+
+.fuel-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Botones de combustible tipo 'chip' */
+.fuel-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: inherit;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.fuel-btn:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+.fuel-btn.active {
+    background: white;
+    color: #333;
+    font-weight: bold;
+    border-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Ajustes para el resultado success (fondo azul/verde) */
+.result.success .btn-secondary,
+.result.success label,
+.result.success .fuel-btn {
+    color: white;
+    border-color: rgba(255,255,255,0.5);
+}
+
+/* Ajuste para el texto legal */
+.legal-note a {
+    color: inherit;
+    text-decoration: underline;
+}
