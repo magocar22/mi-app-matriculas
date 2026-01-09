@@ -18,6 +18,8 @@ class MatriculasData {
      */
     static validateData(data) {
         const currentYear = new Date().getFullYear();
+        const yearsInData = Object.keys(data).filter(k => /^\d{4}$/.test(k)).map(y => parseInt(y, 10));
+        const maxYearInData = yearsInData.length ? Math.max(...yearsInData) : currentYear;
         const validMonths = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         const prohibitedLetters = ['Ñ', 'Q', 'A', 'E', 'I', 'O', 'U'];
         let lastLetters = null;
@@ -60,7 +62,7 @@ class MatriculasData {
                     } else {
                         lastLetters = letters;
                     }
-                } else if (parseInt(year) < currentYear) {
+                } else if (parseInt(year) < maxYearInData) {
                     throw new Error(`Datos incompletos para ${month} ${year}`);
                 }
             }
@@ -68,7 +70,7 @@ class MatriculasData {
 
         if (isValid) {
             console.log(`Datos de matrículas cargados - Versión: ${this.CONFIG.DATA_VERSION}`);
-            console.log(`Período disponible: 2002-${currentYear} | Actualizado: ${this.CONFIG.LAST_UPDATE}`);
+            console.log(`Período disponible: 2002-${maxYearInData} | Actualizado: ${this.CONFIG.LAST_UPDATE}`);
         }
         return isValid;
     }
