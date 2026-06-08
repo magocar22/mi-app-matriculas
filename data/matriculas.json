@@ -13,7 +13,6 @@
     "Nov": "---",
     "Dic": "---"
   },
-{
   "2025": {
     "Ene": "MYF",
     "Feb": "MYW",
@@ -60,9 +59,9 @@
     "Ene": "LWD",
     "Feb": "LWR",
     "Mar": "LXD",
-    "Abr": "LXS",
+    "Abr": "LZF",
     "May": "LYJ",
-    "Jun": "LYZ",
+    "Jun": "LZN",
     "Jul": "LZP",
     "Ago": "LZZ",
     "Sep": "MBN",
@@ -245,7 +244,7 @@
     "Abr": "GMC",
     "May": "GMN",
     "Jun": "GNF",
-    "Jul": "GNY",
+    "Jul": "GPB",
     "Ago": "GPJ",
     "Sep": "GPW",
     "Oct": "GRM",
@@ -282,7 +281,7 @@
   },
   "2006": {
     "Ene": "DVW",
-    "Feb": "DWT",
+    "Feb": "DXB",
     "Mar": "DXZ",
     "Abr": "DYY",
     "May": "FBC",
