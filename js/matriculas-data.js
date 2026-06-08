@@ -58,7 +58,7 @@ class MatriculasData {
                     }
                     if (lastLetters && letters <= lastLetters) {
                         console.warn(`Advertencia: Combinación no secuencial en ${month} ${year}: ${letters} <= ${lastLetters}`);
-                        isValid = false;
+                        //isValid = false;
                     } else {
                         lastLetters = letters;
                     }
